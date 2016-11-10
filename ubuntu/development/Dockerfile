@@ -1,7 +1,7 @@
 FROM huexotzinca/base
 MAINTAINER Neftali Bautista<dev@neftalibautista.com>
 
-LABEL version="0.0.1"
+LABEL version="0.0.2"
 
 ARG USER_NAME="docker"
 ARG USER_PATH="/home/${USER_NAME}"
@@ -10,8 +10,7 @@ ARG ROOT_USER_PASSWORD="docker"
 ARG DOCKER_USER_PASSWORD="${ROOT_USER_PASSWORD}"
 ARG ROOT_DB_PASSWORD="${ROOT_USER_PASSWORD}"
 ARG PHPUNIT_VERSION="5.5"
-ARG APACHE_SEARCH="IncludeOptional sites-enabled/*.conf"
-ARG APACHE_REPLACEMENT="# ${APACHE_SEARCH}\nIncludeOptional /home/docker/apache/main.conf"
+ARG BASH_RC_FILE="bashrc"
 
 RUN apt-get update 
 
@@ -34,45 +33,41 @@ WORKDIR $TMP_PATH
 
 # Composer
 RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" && \
-    php -r "if (hash_file('SHA384', 'composer-setup.php') === 'e115a8dc7871f15d853148a7fbac7da27d6c0030b848d9b3dc09e2a0388afed865e6a3d6b3c0fad45c48e2b5fc1196ae') { echo 'Installer verified'; } else { echo 'Installer corrupt'; unlink('composer-setup.php'); } echo PHP_EOL;" && \
-    php composer-setup.php && \
-    php -r "unlink('composer-setup.php');" && \
-    sudo mv composer.phar /usr/local/bin/composer && \
-    composer global require "phpunit/phpunit=${PHPUNIT_VERSION}.*" && \
-    composer global require "laravel/installer"
+        php composer-setup.php && \
+        php -r "unlink('composer-setup.php');" && \
+        sudo mv composer.phar /usr/local/bin/composer && \
+        sudo composer self-update && \
+        composer global require "phpunit/phpunit=${PHPUNIT_VERSION}.*" && \
+        composer global require "laravel/installer"
 
 # Config apache
 COPY apache "${USER_PATH}/apache"
 COPY media "${USER_PATH}/media"
+COPY start.sh "${USER_PATH}/start.sh"
+
+RUN cp "${USER_PATH}/.bashrc" "${USER_PATH}/.bashrc.old"
+COPY "${BASH_RC_FILE}" "${USER_PATH}/.bashrc"
 
 USER root
 
-RUN chown "${USER_NAME}:${USER_NAME}" "${USER_PATH}/apache" && \
-        chown "${USER_NAME}:${USER_NAME}" "${USER_PATH}/media"
+RUN mkdir "${USER_PATH}/apache/enabled"
+RUN mkdir "${USER_PATH}/apache/sites"
+
+RUN chown -R "${USER_NAME}:${USER_NAME}" "${USER_PATH}/apache" && \
+        chown -R "${USER_NAME}:${USER_NAME}" "${USER_PATH}/media" && \
+        chown -R "${USER_NAME}:${USER_NAME}" "${USER_PATH}/.bashrc"
 
 # Make apache conf backup copy
 RUN cp /etc/apache2/apache2.conf /etc/apache2/apache2.conf.backup
+COPY apache2.conf /etc/apache2/apache2.conf
 
-RUN APACHE_SEARCH="$(echo $APACHE_SEARCH | sed 's=[/.*]=\\\0=gm')" && \
-        APACHE_REPLACEMENT="$(echo $APACHE_REPLACEMENT | sed 's=[/.*]=\\\0=gm')"
-        
-RUN sed -i 's/'"${APACHE_SEARCH}"'/'"${APACHE_REPLACEMENT}"'/' /etc/apache2/apache2.conf
+RUN chmod +X "${USER_PATH}/start.sh" && \
+        chown -R "${USER_NAME}:${USER_NAME}" "${USER_PATH}/start.sh"
 
 RUN apt-get -y install libmysqlclient20 libmysqlclient-dev python-dev
 
 # Install open ssh
 RUN apt-get -y install openssh-server openssh-client
-
-#Enable ssh, apache and mysql on start
-RUN service ssh start && systemctl enable ssh
-RUN systemctl enable apache2
-RUN systemctl enable mysql
-RUN systemctl enable postgresql
-
-CMD ["/usr/sbin/sshd", "-D"]
-CMD ["/usr/sbin/apache2ctl", "-k", "start"]
-CMD ["/usr/sbin/mysqld"]
-CMD ["/usr/lib/postgresql/9.5/bin/postgres", "-D", "/var/lib/postgresql/9.5/main", "-c", "config_file=/etc/postgresql/9.5/main/postgresql.conf"]
 
 # Expose the ssh port
 EXPOSE 22
@@ -88,3 +83,5 @@ EXPOSE 5432
 
 WORKDIR $USER_PATH
 RUN rm -rf "${TMP_PATH}"
+
+CMD ["/home/docker/start.sh"]
