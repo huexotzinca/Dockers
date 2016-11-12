@@ -55,14 +55,14 @@ RUN mkdir "${USER_PATH}/apache/sites"
 
 RUN chown -R "${USER_NAME}:${USER_NAME}" "${USER_PATH}/apache" && \
         chown -R "${USER_NAME}:${USER_NAME}" "${USER_PATH}/media" && \
-        chown -R "${USER_NAME}:${USER_NAME}" "${USER_PATH}/.bashrc"
+        chown "${USER_NAME}:${USER_NAME}" "${USER_PATH}/.bashrc"
 
 # Make apache conf backup copy
 RUN cp /etc/apache2/apache2.conf /etc/apache2/apache2.conf.backup
 COPY apache2.conf /etc/apache2/apache2.conf
 
 RUN chmod +X "${USER_PATH}/start.sh" && \
-        chown -R "${USER_NAME}:${USER_NAME}" "${USER_PATH}/start.sh"
+        chown "${USER_NAME}:${USER_NAME}" "${USER_PATH}/start.sh"
 
 RUN apt-get -y install libmysqlclient20 libmysqlclient-dev python-dev
 

@@ -6,7 +6,7 @@
 </head>
 <body>
 <h1>Welcome</h1>
-<p>The tools has been installede succesfull, congrats. Now you can enjoy:</p>
+<p>The tools has been installed successfully, congratulations. Now you can enjoy:</p>
 <ul>
     <li>Apache2</li>
     <li>PHP</li>
@@ -15,5 +15,6 @@
     <li>Node</li>
     <li>Ruby</li>
 </ul>
+<p><em>Edit this file (/home/docker/media/index.php)</em></p>
 </body>
 </html>
