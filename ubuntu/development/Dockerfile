@@ -43,12 +43,13 @@ RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" &&
 # Config apache
 COPY apache "${USER_PATH}/apache"
 COPY media "${USER_PATH}/media"
-COPY start.sh "${USER_PATH}/start.sh"
 
 RUN cp "${USER_PATH}/.bashrc" "${USER_PATH}/.bashrc.old"
 COPY "${BASH_RC_FILE}" "${USER_PATH}/.bashrc"
 
 USER root
+
+COPY start.sh /root/start.sh
 
 RUN mkdir "${USER_PATH}/apache/enabled"
 RUN mkdir "${USER_PATH}/apache/sites"
@@ -60,9 +61,6 @@ RUN chown -R "${USER_NAME}:${USER_NAME}" "${USER_PATH}/apache" && \
 # Make apache conf backup copy
 RUN cp /etc/apache2/apache2.conf /etc/apache2/apache2.conf.backup
 COPY apache2.conf /etc/apache2/apache2.conf
-
-RUN chmod +X "${USER_PATH}/start.sh" && \
-        chown "${USER_NAME}:${USER_NAME}" "${USER_PATH}/start.sh"
 
 RUN apt-get -y install libmysqlclient20 libmysqlclient-dev python-dev
 
@@ -84,4 +82,4 @@ EXPOSE 5432
 WORKDIR $USER_PATH
 RUN rm -rf "${TMP_PATH}"
 
-CMD ["/home/docker/start.sh"]
+CMD ["/root/start.sh"]
