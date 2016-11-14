@@ -1,4 +1,4 @@
-#! /bin/bash
+#!/bin/bash
 
 #Enable ssh, apache and mysql on start
 service ssh start

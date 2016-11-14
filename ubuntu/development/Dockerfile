@@ -50,6 +50,8 @@ COPY "${BASH_RC_FILE}" "${USER_PATH}/.bashrc"
 USER root
 
 COPY start.sh /root/start.sh
+RUN chmod +x /root/start.sh
+
 
 RUN mkdir "${USER_PATH}/apache/enabled"
 RUN mkdir "${USER_PATH}/apache/sites"
@@ -82,4 +84,4 @@ EXPOSE 5432
 WORKDIR $USER_PATH
 RUN rm -rf "${TMP_PATH}"
 
-CMD ["/root/start.sh"]
+ENTRYPOINT ["/root/start.sh"]
