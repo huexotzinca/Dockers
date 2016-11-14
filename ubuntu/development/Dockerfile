@@ -49,16 +49,15 @@ COPY "${BASH_RC_FILE}" "${USER_PATH}/.bashrc"
 
 USER root
 
-COPY start.sh /root/start.sh
-RUN chmod +x /root/start.sh
-
-
 RUN mkdir "${USER_PATH}/apache/enabled"
 RUN mkdir "${USER_PATH}/apache/sites"
 
 RUN chown -R "${USER_NAME}:${USER_NAME}" "${USER_PATH}/apache" && \
         chown -R "${USER_NAME}:${USER_NAME}" "${USER_PATH}/media" && \
         chown "${USER_NAME}:${USER_NAME}" "${USER_PATH}/.bashrc"
+
+COPY start.sh /root/start.sh
+RUN chmod +x /root/start.sh
 
 # Make apache conf backup copy
 RUN cp /etc/apache2/apache2.conf /etc/apache2/apache2.conf.backup
