@@ -1,15 +1,16 @@
 FROM ubuntu:16.10
 MAINTAINER Neftali Bautista<dev@neftalibautista.com>
 
-LABEL version="0.0.1"
+LABEL version="0.1.0"
 
 ARG USER_NAME="docker"
 ARG USER_PATH="/home/${USER_NAME}"
 ARG TMP_PATH="${USER_PATH}/tmp"
-ARG REDIS_RELEASE="redis-3.2.4"
+ARG REDIS_RELEASE="redis-3.2.8"
 ARG REDIS_TAR_NAME="${REDIS_RELEASE}.tar.gz"
 ARG ROOT_USER_PASSWORD="docker"
 ARG DOCKER_USER_PASSWORD="${ROOT_USER_PASSWORD}"
+ARG BASH_RC_FILE="bashrc"
 
 RUN apt-get update && \
       apt-get -y install build-essential pkg-config autoconf automake bison apt-utils && \
@@ -23,8 +24,8 @@ RUN apt-get update && \
       apt-get -y install libssl-dev libreadline-dev libyaml-dev libxml2-dev libxslt1-dev libffi-dev libreadline6 libreadline6-dev libxslt-dev libc6-dev ncurses-dev
 
 # Adding mongo dependencies
-RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv EA312927 && \
-    echo "deb http://repo.mongodb.org/apt/ubuntu xenial/mongodb-org/3.2 multiverse" | tee /etc/apt/sources.list.d/mongodb-org-3.2.list && \
+RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 0C49F3730359A14518585931BC711F9BA15703C6 && \
+    echo "deb [ arch=amd64,arm64 ] http://repo.mongodb.org/apt/ubuntu xenial/mongodb-org/3.4 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-3.4.list && \
     apt-get update
 
 # Adding docker user
@@ -38,6 +39,18 @@ RUN echo "${USER_NAME} ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers && \
     mkdir "${TMP_PATH}" && \
     chown $USER_NAME:$USER_NAME "${TMP_PATH}"
 
+# BASHRC
+RUN cp "${USER_PATH}/.bashrc" "${USER_PATH}/.bashrc.default"
+COPY "${BASH_RC_FILE}" "${USER_PATH}/.bashrc"
+
+RUN cp "/root/.bashrc" "/root/.bashrc.default"
+COPY "${BASH_RC_FILE}" "/root/.bashrc"
+
+RUN chown "root:root" "/root/.bashrc" && \
+    chown "root:root" "/root/.bashrc.default" && \
+    chown "${USER_NAME}:${USER_NAME}" "${USER_PATH}/.bashrc" && \
+    chown "${USER_NAME}:${USER_NAME}" "${USER_PATH}/.bashrc.default"
+
 USER $USER_NAME
 
 WORKDIR $TMP_PATH
@@ -47,7 +60,7 @@ RUN gpg --keyserver hkp://keys.gnupg.net --recv-keys 409B6B1796C275462A170311380
 RUN /bin/bash -l -c "curl -L https://get.rvm.io | bash -s stable"
 
 #Install NVM
-RUN /bin/bash -l -c "curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.32.0/install.sh | bash"
+RUN /bin/bash -l -c "curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.33.1/install.sh | bash"
 
 RUN /bin/bash -l -c  "rvm install 2.3 && \
       rvm install 2.2 && \
@@ -58,9 +71,10 @@ RUN /bin/bash -l -c  "rvm install 2.3 && \
       gem install rails"
 
 RUN /bin/bash -l -c "source \"${USER_PATH}/.nvm/nvm.sh\" && \
-        nvm install 6.6 && \
+        nvm install 6.10 && \
         nvm install 4.5 && \
-        nvm alias default 6.6 && \
+        nvm install 0.12.18 && \
+        nvm alias default 6.10 && \
         npm install -g less  && \
         npm install -g uglify-js && \
         npm install -g socket.io && \
@@ -68,15 +82,15 @@ RUN /bin/bash -l -c "source \"${USER_PATH}/.nvm/nvm.sh\" && \
         npm install -g handlebars && \
         npm install -g grunt && \
         npm install -g brunch && \
-        npm install -g vows && \
         npm install -g bower && \
         npm install -g browserify  && \
         npm install -g forever"
 
-# ## TESTING
+## TESTING
 RUN /bin/bash -l -c "source \"${USER_PATH}/.nvm/nvm.sh\" && \
-        npm install -g jasmine  && \
-        npm install -g jasmine-node  && \
+        npm install -g vows && \
+        npm install -g jasmine && \
+        npm install -g jasmine-node && \
         npm install -g mocha && \
         npm install -g --save-dev qunitjs && \
         npm install -g blanket && \
@@ -92,6 +106,7 @@ RUN /bin/bash -l -c "source \"${USER_PATH}/.nvm/nvm.sh\" && \
       npm install -g sails && \
       npm install -g geddy && \
       npm install -g ember-cli && \
+      npm install -g @angular/cli && \
       npm install -g yo && \
       npm install -g generator-webapp && \
       npm install -g generator-jquery && \
@@ -124,4 +139,4 @@ WORKDIR $USER_PATH
 
 RUN rm -rf "${TMP_PATH}"
 
-EXPOSE 3000 3200 5000 22
+EXPOSE 3000 3200 5000 4200 49153 30820 22
