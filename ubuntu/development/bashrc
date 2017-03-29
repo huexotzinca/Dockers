@@ -16,19 +16,19 @@ C_WHITE="\[\033[0;37m\]"
 C_WHITEBOLD="\[\033[1;37m\]"
 C_RESETCOLOR="\[\033[00m\]"
 
-get_pwd(){
+function get_pwd(){
   echo "$C_BLUE\w$C_RESETCOLOR"
 }
 
-get_base_name(){
+function get_base_name(){
   echo "$C_GREEN\u$C_RESETCOLOR"
 }
 
-get_is_ok(){
+function get_is_ok(){
   echo "\`if [ \$? = 0 ]; then echo ; else echo 😖; echo \n fi\` "
 }
 
-get_git_prompt_info() {
+function get_git_prompt_info() {
   echo '$(git branch &>/dev/null;\
 if [ $? -eq 0 ]; then \
   echo "$(echo `git status` | grep "nothing to commit" > /dev/null 2>&1; \
@@ -68,12 +68,16 @@ alias grep='grep --color=auto'
 alias fgrep='fgrep --color=auto'
 alias egrep='egrep --color=auto'
 alias ll='ls -alF'
-alias la='ls -A'
+alias la='ls -AlG'
 alias l='ls -CF'
 function take(){ mkdir -p $1; cd $1; }
 
+# to enable __git_ps1
+source /etc/bash_completion.d/git-prompt
+
 export PS1="$C_RED$(get_is_ok)$C_RESETCOLOR\n$(get_base_name)$C_YELLOW@$C_RESETCOLOR\h$C_YELLOW:$C_RESETCOLOR$(get_pwd)$(get_git_prompt_info)\n$C_YELLOW ↪ $C_RESETCOLOR"
 
+[[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm"
 export PATH="$PATH:$HOME/.rvm/bin" # Add RVM to PATH for scripting
 
 export NVM_DIR="/home/docker/.nvm"
