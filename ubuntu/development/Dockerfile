@@ -1,7 +1,7 @@
 FROM huexotzinca/base
 MAINTAINER Neftali Bautista<dev@neftalibautista.com>
 
-LABEL version="0.0.2"
+LABEL version="0.1.0"
 
 ARG USER_NAME="docker"
 ARG USER_PATH="/home/${USER_NAME}"
@@ -9,7 +9,7 @@ ARG TMP_PATH="${USER_PATH}/tmp"
 ARG ROOT_USER_PASSWORD="docker"
 ARG DOCKER_USER_PASSWORD="${ROOT_USER_PASSWORD}"
 ARG ROOT_DB_PASSWORD="${ROOT_USER_PASSWORD}"
-ARG PHPUNIT_VERSION="5.5"
+ARG PHPUNIT_VERSION="6.0"
 ARG BASH_RC_FILE="bashrc"
 
 RUN apt-get update 
@@ -21,7 +21,10 @@ RUN apt-get -y install apache2 apache2-dev && \
     apt-get -y install mysql-client && \
     DEBIAN_FRONTEND=noninteractive apt-get -y install postgresql && \
     apt-get -y install postgresql-client postgresql-contrib && \
-    apt-get -y install libapache2-mod-php php-gd php-ldap php-odbc php-mysql php-pgsql libapache2-mod-auth-pgsql php-curl php-xmlrpc php-intl php-mcrypt && \
+    apt-get -y install libapache2-mod-php php-gd php-ldap php-odbc && \
+    apt-get -y install php-mysql php-pgsql libapache2-mod-auth-pgsql && \
+    apt-get -y install php-curl php-xmlrpc php-intl php-mcrypt && \
+    apt-get -y install php7.0-mbstring libapache2-mod-php7.0 && \
     apt-get -y install php-pear pear-channels
 
 RUN pear channel-update pear.php.net && \
@@ -68,9 +71,6 @@ RUN apt-get -y install libmysqlclient20 libmysqlclient-dev python-dev
 # Install open ssh
 RUN apt-get -y install openssh-server openssh-client
 
-# Expose the ssh port
-EXPOSE 22
-
 # Expose the Apache ports
 EXPOSE 80 8080
 
@@ -80,6 +80,11 @@ EXPOSE 3306
 # Expose the PostgreSQL port
 EXPOSE 5432
 
+#### Expose the Frameworks ports: ####
+# PHP: laravel
+EXPOSE 8000
+
+### /Expose the Frameworks ports   ###
 WORKDIR $USER_PATH
 RUN rm -rf "${TMP_PATH}"
 
