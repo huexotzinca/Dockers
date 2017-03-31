@@ -5,11 +5,13 @@
 This repo contains all Dockerfiles for automaticbuild used in [Huexotzinca's containers](https://hub.docker.com/u/huexotzinca/)
 
 
+
 ## [Base Version](https://hub.docker.com/r/huexotzinca/base/)
 
 This Dockerfile builds an container for development purposes, [based on Ubuntu](https://hub.docker.com/_/ubuntu/) plus the next tools:
 
 - Open SSH
+- Git, Subversion and Bzr
 - NVM
 	- Node 0.12.18
 	- Node 6.10
@@ -97,8 +99,22 @@ This Dockerfile builds an container for development purposes, [based on Ubuntu](
 	> docker ps -la
 	```
 
+4. Now you can set yours locales and time (as root or sudo):
+	```bash
+	# Configure yours $LC_* and $LANG
+	> sudo dpkg-reconfigure locales
+	# And your time zone
+	> sudo dpkg-reconfigure tzdata
+	```
+
 Finally if you need connect through SSH you can see ```docker port YOUR_CONTAINER_ID | grep -E 22/tcp | grep -oE "[0-9]{4,6}"``` for show the bridge port.
+
 
 ### RVM Notes
 
 The only thing you need know is that RVM needs enter with login shell, and in docker interactive (docker run -it) and in exec (docker exec -it) this doesn't work; so in case of you can't run ```ruby --version```, maybe you need exec ``` /bin/bash --login ``` into your container with `docker` user session. Otherwise you can try connect through SSH if your terminal supports user login RVM works fine.
+
+
+### NoSQL Notes
+
+For start mongo you need run ```mongod```  and ```redis-server``` for redis into `docker` user session for start the server. Remember, the ```docker port YOUR_CONTAINER_ID``` command show you the ports bind to your container.
