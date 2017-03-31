@@ -58,6 +58,13 @@ This Dockerfile builds an container for development purposes, [based on Ubuntu-B
 	> docker ps -la
 	```
 
+4. Finally you can set yours locales and time (as root or sudo):
+	```bash
+	# Configure yours $LC_* and $LANG
+	> sudo dpkg-reconfigure locales
+	# And your time zone
+	> sudo dpkg-reconfigure tzdata
+	```
 
 ### SQL (MySQL, PostgreSQL) Notes
 
