@@ -1,7 +1,7 @@
 FROM huexotzinca/base
 MAINTAINER Neftali Bautista<dev@neftalibautista.com>
 
-LABEL version="0.1.0"
+LABEL version="0.1.1"
 
 ARG USER_NAME="docker"
 ARG USER_PATH="/home/${USER_NAME}"
@@ -36,12 +36,12 @@ WORKDIR $TMP_PATH
 
 # Composer
 RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" && \
-        php composer-setup.php && \
-        php -r "unlink('composer-setup.php');" && \
-        sudo mv composer.phar /usr/local/bin/composer && \
-        sudo composer self-update && \
-        composer global require "phpunit/phpunit=${PHPUNIT_VERSION}.*" && \
-        composer global require "laravel/installer"
+    php composer-setup.php && \
+    php -r "unlink('composer-setup.php');" && \
+    sudo mv composer.phar /usr/local/bin/composer && \
+    sudo composer self-update && \
+    composer global require "phpunit/phpunit=${PHPUNIT_VERSION}.*" && \
+    composer global require "laravel/installer"
 
 # Config apache
 COPY apache "${USER_PATH}/apache"
@@ -56,8 +56,8 @@ RUN mkdir "${USER_PATH}/apache/enabled"
 RUN mkdir "${USER_PATH}/apache/sites"
 
 RUN chown -R "${USER_NAME}:${USER_NAME}" "${USER_PATH}/apache" && \
-        chown -R "${USER_NAME}:${USER_NAME}" "${USER_PATH}/media" && \
-        chown "${USER_NAME}:${USER_NAME}" "${USER_PATH}/.bashrc"
+    chown -R "${USER_NAME}:${USER_NAME}" "${USER_PATH}/media" && \
+    chown "${USER_NAME}:${USER_NAME}" "${USER_PATH}/.bashrc"
 
 COPY start.sh /root/start.sh
 RUN chmod +x /root/start.sh
@@ -83,8 +83,8 @@ EXPOSE 5432
 #### Expose the Frameworks ports: ####
 # PHP: laravel
 EXPOSE 8000
-
 ### /Expose the Frameworks ports   ###
+
 WORKDIR $USER_PATH
 RUN rm -rf "${TMP_PATH}"
 
