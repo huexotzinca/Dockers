@@ -1,12 +1,12 @@
 FROM ubuntu:16.10
 MAINTAINER Neftali Bautista<dev@neftalibautista.com>
 
-LABEL version="0.1.1"
+LABEL version="0.1.2"
 
 ARG USER_NAME="docker"
 ARG USER_PATH="/home/${USER_NAME}"
 ARG TMP_PATH="${USER_PATH}/tmp"
-ARG REDIS_RELEASE="redis-3.2.8"
+ARG REDIS_RELEASE="redis-4.0.2"
 ARG REDIS_TAR_NAME="${REDIS_RELEASE}.tar.gz"
 ARG PHANTOMJS_RELEASE="phantomjs-2.1.1"
 ARG PHANTOMJS_VER_NAME="${PHANTOMJS_RELEASE}-linux-x86_64"
@@ -84,19 +84,22 @@ RUN /bin/bash -l -c "curl -L https://get.rvm.io | bash -s stable"
 #Install NVM
 RUN /bin/bash -l -c "curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.33.1/install.sh | bash"
 
-RUN /bin/bash -l -c  "rvm install 2.3 && \
-      rvm install 2.2 && \
-      rvm --default use 2.2 && \
+RUN /bin/bash -l -c  "rvm install 2.4 && \
+      rvm install 2.0.0 && \
+      rvm --default use 2.4 && \
+      gem install bundler --pre && \
+      gem install gemrat && \
+      gem install mongoid && \
       gem install haml && \
       gem install sass && \
       gem install compass && \
-      gem install rails"
+      gem install rails && \
+      rails new tmpblog && rm -rf tmpblog"
 
 RUN /bin/bash -l -c "source \"${USER_PATH}/.nvm/nvm.sh\" && \
-        nvm install 6.10 && \
-        nvm install 4.5 && \
-        nvm install 0.12.18 && \
-        nvm alias default 6.10 && \
+        nvm install 6.11.3 && \
+        nvm install 8.6.0 && \
+        nvm alias default 8.6.0 && \
         npm install -g less  && \
         npm install -g uglify-js && \
         npm install -g socket.io && \
