@@ -68,17 +68,21 @@ alias grep='grep --color=auto'
 alias fgrep='fgrep --color=auto'
 alias egrep='egrep --color=auto'
 alias ll='ls -alF'
-alias la='ls -AlG'
+alias la='ls -A'
 alias l='ls -CF'
 function take(){ mkdir -p $1; cd $1; }
 
-# to enable __git_ps1
-source /etc/bash_completion.d/git-prompt
+PS1="$C_RED$(get_is_ok)$C_RESETCOLOR\n$(get_base_name)$C_YELLOW@$C_RESETCOLOR\h$C_YELLOW:$C_RESETCOLOR$(get_pwd)$(get_git_prompt_info)\n$C_RED #↪ $C_RESETCOLOR"
 
-export PS1="$C_RED$(get_is_ok)$C_RESETCOLOR\n$(get_base_name)$C_YELLOW@$C_RESETCOLOR\h$C_YELLOW:$C_RESETCOLOR$(get_pwd)$(get_git_prompt_info)\n$C_YELLOW ↪ $C_RESETCOLOR"
+# If isn't root user
+if [ "$(id -u)" != "0" ]; then
+  PS1="$C_RED$(get_is_ok)$C_RESETCOLOR\n$(get_base_name)$C_YELLOW@$C_RESETCOLOR\h$C_YELLOW:$C_RESETCOLOR$(get_pwd)$(get_git_prompt_info)\n$C_YELLOW ↪ $C_RESETCOLOR"
+  
+  [[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm"
+  export PATH="$PATH:$HOME/.rvm/bin" # Add RVM to PATH for scripting
 
-[[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm"
-export PATH="$PATH:$HOME/.rvm/bin" # Add RVM to PATH for scripting
+  export NVM_DIR="/home/docker/.nvm"
+  [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"  # This loads nvm
+fi
 
-export NVM_DIR="/home/docker/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"  # This loads nvm
+export PS1
