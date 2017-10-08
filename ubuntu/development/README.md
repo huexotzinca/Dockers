@@ -19,9 +19,9 @@ This Dockerfile builds an container for development purposes, [based on Ubuntu-B
 - [NVM](https://github.com/creationix/nvm)**
 - [RVM](https://rvm.io/)**
 
-** For NVM and RVM check this [list](https://github.com/huexotzinca/Dockers/tree/ubuntu-base/ubuntu/base) that show you info from the packages and tools installed into the base image.
+** For NVM and RVM check this [list](https://github.com/huexotzinca/Dockers/tree/ubuntu-base/ubuntu/base), that will show you info from the packages and tools installed into the base image.
 
-> Remember the main user info is the next (User/Password):
+> Remember the main user info are the next (User/Password):
 > 
 >	`docker/docker`
 >
@@ -66,9 +66,81 @@ This Dockerfile builds an container for development purposes, [based on Ubuntu-B
 	> sudo dpkg-reconfigure tzdata
 	```
 
+
+### Apache Notes
+
+> NOTE: If you want mount a volume or volumes with your projects in PHP, then need you mount that volume(s) with default parameters, because www-data user is into admin group and the default values in run command set ` chown docker:admin ` values to these.
+
+To enable sites on Apache like my-site.conf :
+
+1. Create your my-site.conf on ~/apache/sites/ into Docker user session
+	```bash
+	> touch /home/docker/apache/sites/my-site.conf
+	# Edit your conf file
+	> vim !$
+	```
+
+2. Create the Symlink on ~/apache/enabled
+	```bash
+	> ln -s /home/docker/apache/sites/my-site.conf /home/docker/apache/enabled/my-site.conf
+	```
+
+3. Finally restart apache and enjoy:
+	```bash
+	> sudo apache2ctl -k restart
+	# OR
+	> sudo service apache2 restart
+	```
+
+Remember when you add ServerName apache parameter you need a DNS or add to your HOSTS file, example:
+
+1. Repeat the previous 3 steps but in the step 1 do the next:
+	```bash
+	> vim /home/docker/your-site.conf
+	```
+	```config
+	# Into VIM like docker user on your container
+	Define MY_SITE_PATH /my/path/to/my/site
+	ServerName my-site.dev
+	<VirtualHost *:80>
+	  DocumentRoot "${MY_SITE_PATH}"
+	  ServerName subdomain.my-site.dev
+	  DirectoryIndex  index.php index.html
+
+	  ServerAdmin dev@airview.info
+
+	  ErrorLog  ${ERRORS_PATH}/airview.error.log
+	  CustomLog ${LOGS_PATH}/airview.log common
+	  <Directory "${MY_SITE_PATH}/">
+	    Options Indexes FollowSymLinks  Includes  ExecCGI
+	    AllowOverride All
+	    Order Allow,Deny
+	    Allow from all
+	    Require all granted
+	  </Directory>
+	</VirtualHost>
+	```
+
+2. Edit in ***your machine*** (**NOT DOCKER CONTAINER**) edit your HOSTFILE
+```bash
+	#linux
+	> vim /etc/hosts
+	#mac
+	> vim /private/etc/hosts
+	#windows maybe in windows you need move the file and then edit (is allowed) next you can overwrite the file.
+	> /system32/drivers/etc/hosts
+```
+and add the line:
+```bash
+ip.of.your.docker_container	my-site.dev subdomain.my-site.dev
+#eg. 
+# 192.168.1.15	my-site.dev	subdomain.my-site.dev
+```
+
+
 ### SQL (MySQL, PostgreSQL) Notes
 
-If you need connect to MySql:
+If you want connect to MySql, then try:
 
 ```bash
 # User: root
@@ -90,4 +162,25 @@ sudo -i -u postgres
 postgres=# psql
 ```
 
-And have fun :sunglasses: !!
+
+### NoSQL (Mongo Notes)
+See the [ubuntu-base](https://github.com/huexotzinca/Dockers/tree/ubuntu-base/ubuntu/base) branch documentation.
+
+
+### Vim Notes
+
+If you have issues with vim, try to reinstall all plugins, with [Plug](https://github.com/junegunn/vim-plug) is so easy:
+```bash
+# Into vim run
+:PlugClean
+# then confirm
+# and after that run
+:PlugInstall
+
+# to reinstall all plugins, finally restart vim
+```
+
+The themes and air-line plugin work better on ssh connection.
+
+
+And enjoy make code :sunglasses: !!

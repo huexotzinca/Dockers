@@ -70,6 +70,11 @@ alias egrep='egrep --color=auto'
 alias ll='ls -alF'
 alias la='ls -AlG'
 alias l='ls -CF'
+
+alias artisan='php artisan'
+alias gs='git status'
+alias gl='git log --graph --oneline --all --color --decorate --abbrev-commit'
+
 function take(){ mkdir -p $1; cd $1; }
 
 # to enable __git_ps1

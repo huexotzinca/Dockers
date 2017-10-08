@@ -1,10 +1,12 @@
 # Release Notes
 
-## v0.1.1 (2017-03-31)
+## v0.1.3 (2017-10-03)
 
-### Added
-- Added rewrite and expires modules for apache.
+### Fixed
+- Composer not cache packages.
+- Media folder and volumes mounted in container doesn't have permissions for apache user. See README.md for more info.
 
-### Changed
-- Changed the way of Apache start from Dockerfile to start.sh file, through ENTRYPOINT.
-- Updated to the latest [huexotzinca/ubuntu-base:v0.1.1](https://github.com/huexotzinca/Dockers/tree/ubv0.1.1/ubuntu/base)
+### Updated
+- Install PHP 7.
+- Change PHPUnit version from 6.0 to 6.3
+- Adding vim info on README.md for common issues.
