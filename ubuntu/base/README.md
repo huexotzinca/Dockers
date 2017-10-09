@@ -84,14 +84,14 @@ This Dockerfile builds an container for development purposes, [based on Ubuntu](
 	```bash
 	> docker build -t my_image_name:my_tag .
 	# Example:
-	> docker build -t huexotzinca/base:v0.1.0 .
+	> docker build -t huexotzinca/ubuntu-base:v0.1.3 .
 	```
 
 3. Now you can run your container
 	```bash
 	> docker run -itP my_image_name:my_tag
 	# Example, I would like have access to my code in the container, so you need -v (volume parameter):
-	> docker run -itP -v /my/machine/path/for/projects:/home/docker/projects huexotzinca/base:v0.1.0
+	> docker run -itP -v /my/machine/path/for/projects:/home/docker/projects huexotzinca/ubuntu-base:v0.1.3
 	> 
 	# List your container ports with:
 	> docker port YOUR_CONTAINER_ID
@@ -117,4 +117,4 @@ The only thing you need know is that RVM needs enter with login shell, and in do
 
 ### NoSQL Notes
 
-For start mongo you need run ```mongod```  and ```redis-server``` for redis into `docker` user session for start the server. Remember, the ```docker port YOUR_CONTAINER_ID``` command show you the ports bind to your container.
+To start mongo you need run ```mongod```  and ```redis-server``` for redis into `docker` user session for start the server. Remember, the ```docker port YOUR_CONTAINER_ID``` command show you the ports bind to your container.

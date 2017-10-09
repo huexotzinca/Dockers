@@ -1,12 +1,16 @@
 FROM ubuntu:16.10
 MAINTAINER Neftali Bautista<dev@neftalibautista.com>
 
-LABEL version="0.1.1"
+LABEL version="0.1.3"
 
+ARG ADMIN_GROUP_NAME="admin"
 ARG USER_NAME="docker"
+ARG USER_GROUP_NAME="${USER_NAME}"
 ARG USER_PATH="/home/${USER_NAME}"
 ARG TMP_PATH="${USER_PATH}/tmp"
-ARG REDIS_RELEASE="redis-3.2.8"
+ARG REDIS_RELEASE="redis-4.0.2"
+ARG WATCHMAN_RELEASE="4.9.0"
+ARG WATCHMAN_RELEASE_NAME="v${WATCHMAN_RELEASE}"
 ARG REDIS_TAR_NAME="${REDIS_RELEASE}.tar.gz"
 ARG PHANTOMJS_RELEASE="phantomjs-2.1.1"
 ARG PHANTOMJS_VER_NAME="${PHANTOMJS_RELEASE}-linux-x86_64"
@@ -46,15 +50,15 @@ RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 0C49F3730359A14
     apt-get update
 
 # Adding docker user
-RUN groupadd admin && \
-    groupadd "${USER_NAME}" && \
-    useradd -m -g "${USER_NAME}" -G admin -s /bin/bash "${USER_NAME}"
+RUN groupadd "${ADMIN_GROUP_NAME}" && \
+    groupadd "${USER_GROUP_NAME}" && \
+    useradd -m -g "${USER_GROUP_NAME}" -G "${ADMIN_GROUP_NAME}" -s /bin/bash "${USER_NAME}"
 
 RUN echo "${USER_NAME} ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers && \
     echo "root:${ROOT_USER_PASSWORD}" | chpasswd && \
     echo "docker:${ROOT_USER_PASSWORD}" | chpasswd && \
     mkdir "${TMP_PATH}" && \
-    chown $USER_NAME:$USER_NAME "${TMP_PATH}"
+    chown $USER_NAME:$USER_GROUP_NAME "${TMP_PATH}"
 
 # BASHRC
 RUN cp "${USER_PATH}/.bashrc" "${USER_PATH}/.bashrc.default"
@@ -66,9 +70,9 @@ COPY "${BASH_RC_FILE}" "/root/.bashrc"
 
 RUN chown "root:root" "/root/.bashrc" && \
     chown "root:root" "/root/.bashrc.default" && \
-    chown "${USER_NAME}:${USER_NAME}" "${USER_PATH}/.bashrc" && \
-    chown "${USER_NAME}:${USER_NAME}" "${USER_PATH}/.bashrc.default" && \
-    chown "${USER_NAME}:${USER_NAME}" "/opt/phantomjs"
+    chown "${USER_NAME}:${USER_GROUP_NAME}" "${USER_PATH}/.bashrc" && \
+    chown "${USER_NAME}:${USER_GROUP_NAME}" "${USER_PATH}/.bashrc.default" && \
+    chown "${USER_NAME}:${USER_GROUP_NAME}" "/opt/phantomjs"
 
 COPY start.sh /root/start.sh
 RUN chmod +x /root/start.sh
@@ -84,19 +88,22 @@ RUN /bin/bash -l -c "curl -L https://get.rvm.io | bash -s stable"
 #Install NVM
 RUN /bin/bash -l -c "curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.33.1/install.sh | bash"
 
-RUN /bin/bash -l -c  "rvm install 2.3 && \
-      rvm install 2.2 && \
-      rvm --default use 2.2 && \
+RUN /bin/bash -l -c  "rvm install 2.4 && \
+      rvm install 2.0.0 && \
+      rvm --default use 2.4 && \
+      gem install bundler --pre && \
+      gem install gemrat && \
+      gem install mongoid && \
       gem install haml && \
       gem install sass && \
       gem install compass && \
-      gem install rails"
+      gem install rails && \
+      rails new tmpblog && rm -rf tmpblog"
 
 RUN /bin/bash -l -c "source \"${USER_PATH}/.nvm/nvm.sh\" && \
-        nvm install 6.10 && \
-        nvm install 4.5 && \
-        nvm install 0.12.18 && \
-        nvm alias default 6.10 && \
+        nvm install 6.11.3 && \
+        nvm install 8.6.0 && \
+        nvm alias default 8.6.0 && \
         npm install -g less  && \
         npm install -g uglify-js && \
         npm install -g socket.io && \
@@ -146,7 +153,7 @@ RUN /bin/bash -l -c "source \"${USER_PATH}/.nvm/nvm.sh\" && \
 WORKDIR $TMP_PATH
 RUN git clone https://github.com/facebook/watchman.git && \
     cd watchman && \
-    git checkout v4.7.0 && \
+    git checkout "${WATCHMAN_RELEASE_NAME}" && \
     ./autogen.sh && \
     ./configure && \
     make
@@ -179,8 +186,8 @@ RUN cd "${REDIS_RELEASE}" && \
 # install mongoDB opensource version
 RUN apt-get install -y mongodb-org && \
     mkdir -p /data/db && \
-    chown "${USER_NAME}:${USER_NAME}" "/data" && \
-    chown "${USER_NAME}:${USER_NAME}" "/data/db"
+    chown "${USER_NAME}:${USER_GROUP_NAME}" "/data" && \
+    chown "${USER_NAME}:${USER_GROUP_NAME}" "/data/db"
 
 RUN ln -s /opt/phantomjs/${PHANTOMJS_VER_NAME}/bin/phantomjs /usr/bin/phantomjs
 
