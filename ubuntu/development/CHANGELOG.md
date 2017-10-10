@@ -5,6 +5,7 @@
 ### Fixed
 - Composer not cache packages.
 - Media folder and volumes mounted in container doesn't have permissions for apache user. See README.md for more info.
+- Composer packages added to global path.
 
 ### Updated
 - Install PHP 7.

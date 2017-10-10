@@ -85,5 +85,8 @@ export PS1="$C_RED$(get_is_ok)$C_RESETCOLOR\n$(get_base_name)$C_YELLOW@$C_RESETC
 [[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm"
 export PATH="$PATH:$HOME/.rvm/bin" # Add RVM to PATH for scripting
 
-export NVM_DIR="/home/docker/.nvm"
+export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"  # This loads nvm
+
+# Composer
+export PATH="$PATH:$HOME/composer/vendor/bin"
