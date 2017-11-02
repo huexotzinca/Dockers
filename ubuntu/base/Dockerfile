@@ -1,7 +1,7 @@
 FROM ubuntu:16.10
 MAINTAINER Neftali Bautista<dev@neftalibautista.com>
 
-LABEL version="0.1.3"
+LABEL version="0.1.4"
 
 ARG ADMIN_GROUP_NAME="admin"
 ARG USER_NAME="docker"
@@ -10,11 +10,14 @@ ARG USER_PATH="/home/${USER_NAME}"
 ARG TMP_PATH="${USER_PATH}/tmp"
 ARG REDIS_RELEASE="redis-4.0.2"
 ARG WATCHMAN_RELEASE="4.9.0"
+ARG OPENRESTY_RELEASE="1.11.2.5"
+ARG PHANTOMJS_RELEASE="phantomjs-2.1.1"
 ARG WATCHMAN_RELEASE_NAME="v${WATCHMAN_RELEASE}"
 ARG REDIS_TAR_NAME="${REDIS_RELEASE}.tar.gz"
-ARG PHANTOMJS_RELEASE="phantomjs-2.1.1"
 ARG PHANTOMJS_VER_NAME="${PHANTOMJS_RELEASE}-linux-x86_64"
 ARG PHANTOMJS_TAR_NAME="${PHANTOMJS_VER_NAME}.tar.bz2"
+ARG OPENRESTY_VER_NAME="openresty-${OPENRESTY_RELEASE}"
+ARG OPENRESTY_TAR_NAME="${OPENRESTY_VER_NAME}.tar.gz"
 ARG ROOT_USER_PASSWORD="docker"
 ARG DOCKER_USER_PASSWORD="${ROOT_USER_PASSWORD}"
 ARG BASH_RC_FILE="bashrc"
@@ -81,6 +84,11 @@ USER $USER_NAME
 
 WORKDIR $TMP_PATH
 
+#Install Lua VM
+RUN git clone https://github.com/DhavalKapil/luaver.git ~/.luaver && \
+    echo "[ -s ~/.luaver/luaver  ] && . ~/.luaver/luaver" >> ~/.bashrc && \
+    echo "[ -s ~/.luaver/completions/luaver.bash  ] && . ~/.luaver/completions/luaver.bash" >> ~/.bashrc
+
 #Install RVM
 RUN gpg --keyserver hkp://keys.gnupg.net --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3
 RUN /bin/bash -l -c "curl -L https://get.rvm.io | bash -s stable"
@@ -88,22 +96,56 @@ RUN /bin/bash -l -c "curl -L https://get.rvm.io | bash -s stable"
 #Install NVM
 RUN /bin/bash -l -c "curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.33.1/install.sh | bash"
 
+### LUA PACKAGES
+##################################
+RUN /bin/bash -l -c  "echo 'Y' | luaver install 5.1.5 && \
+      echo 'Y' | luaver use 5.1.5 && \
+      echo 'Y' | luaver set-default 5.1.5"
+
+RUN /bin/bash -l -c  "echo 'Y' | luaver use-luarocks 2.4.3 && \
+      echo 'Y' | luaver set-default-luarocks 2.4.3"
+
+## Lapis
+RUN sudo apt-get -y install libpcre3-dev \
+    libssl-dev perl make build-essential curl
+
+RUN curl -O "https://openresty.org/download/${OPENRESTY_TAR_NAME}" && \
+    tar -xvzf ${OPENRESTY_TAR_NAME} && \
+    cd "${OPENRESTY_VER_NAME}" && \
+    ./configure && \
+    make && \
+    sudo make install
+
+RUN /bin/bash -l -c  "luarocks install moonscript && \
+      luarocks install lapis"
+### /LUA PACKAGES
+
+### RUBY GEMS
+##################################
 RUN /bin/bash -l -c  "rvm install 2.4 && \
       rvm install 2.0.0 && \
       rvm --default use 2.4 && \
       gem install bundler --pre && \
+      gem install guard && \
+      gem install guard-shell && \
       gem install gemrat && \
       gem install mongoid && \
       gem install haml && \
       gem install sass && \
       gem install compass && \
       gem install rails && \
+      gem install roda && \
+      gem install sinatra && \
       rails new tmpblog && rm -rf tmpblog"
+### /RUBY GEMS
 
+### NODEJS MODULES
+##################################
 RUN /bin/bash -l -c "source \"${USER_PATH}/.nvm/nvm.sh\" && \
         nvm install 6.11.3 && \
         nvm install 8.6.0 && \
         nvm alias default 8.6.0 && \
+        npm install -g mitol  && \
         npm install -g less  && \
         npm install -g uglify-js && \
         npm install -g socket.io && \
@@ -148,6 +190,7 @@ RUN /bin/bash -l -c "source \"${USER_PATH}/.nvm/nvm.sh\" && \
       npm install -g generator-backbone && \
       npm install -g generator-angular && \
       npm install -g generator-karma"
+### /NODEJS MODULES
 
 # install watchman for ember
 WORKDIR $TMP_PATH
@@ -195,6 +238,6 @@ WORKDIR $USER_PATH
 
 RUN rm -rf "${TMP_PATH}"
 
-EXPOSE 22 27017 3000 3200 30820 4200 49153 5000 6379 7357
+EXPOSE 22 27017 3000 3200 30820 4200 49153 5000 6379 7357 8080
 
 ENTRYPOINT ["/root/start.sh"]

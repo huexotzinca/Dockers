@@ -55,8 +55,13 @@ This Dockerfile builds an container for development purposes, [based on Ubuntu](
 - RVM
 	- haml
 	- sass
+  - guard
 	- compass
+  - coda
+  - sinatra
 	- rails
+- [LuaVM](https://github.com/DhavalKa)
+  - [Lapis](http://leafo.net/lapis/)
 - NoSQL
 	- MongoDB
 	- Redis
@@ -84,14 +89,14 @@ This Dockerfile builds an container for development purposes, [based on Ubuntu](
 	```bash
 	> docker build -t my_image_name:my_tag .
 	# Example:
-	> docker build -t huexotzinca/ubuntu-base:v0.1.3 .
+	> docker build -t huexotzinca/ubuntu-base:v0.1.4 .
 	```
 
 3. Now you can run your container
 	```bash
 	> docker run -itP my_image_name:my_tag
 	# Example, I would like have access to my code in the container, so you need -v (volume parameter):
-	> docker run -itP -v /my/machine/path/for/projects:/home/docker/projects huexotzinca/ubuntu-base:v0.1.3
+	> docker run -itP -v /my/machine/path/for/projects:/home/docker/projects huexotzinca/ubuntu-base:v0.1.4
 	> 
 	# List your container ports with:
 	> docker port YOUR_CONTAINER_ID
@@ -118,3 +123,17 @@ The only thing you need know is that RVM needs enter with login shell, and in do
 ### NoSQL Notes
 
 To start mongo you need run ```mongod```  and ```redis-server``` for redis into `docker` user session for start the server. Remember, the ```docker port YOUR_CONTAINER_ID``` command show you the ports bind to your container.
+
+
+### OPEN Resty
+
+When build your container to performace resty to the best compatibility with your machine change the ```./configure``` and ```make``` commands for ```./configure -j4``` and ```make -j4``` where the j# are the cores of your processor (CPU). Or you can see the [full documentation](https://openresty.org/cn/installation.html) for more info.
+
+
+### Lapis
+
+To run your first Lapis app only:
+  - Make your app dir and enter into this, ```mkdir blog && cd blog```
+  - Init the lapis dir ```lapis new```
+  - Compile ```moonc app.moon```
+  - And start your server ```lapis server```
