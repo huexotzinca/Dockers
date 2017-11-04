@@ -1,13 +1,10 @@
 # Release Notes
 
-## v0.1.3 (2017-10-03)
-
-### Fixed
-- Composer not cache packages.
-- Media folder and volumes mounted in container doesn't have permissions for apache user. See README.md for more info.
-- Composer packages added to global path.
+## v0.1.4 (2017-11-03)
 
 ### Updated
-- Install PHP 7.
-- Change PHPUnit version from 6.0 to 6.3
-- Adding vim info on README.md for common issues.
+- Changed the vim and git config files from Dockerfile to after_install.sh for keep updated.
+
+### Installed
+- [PhalconPHP](https://phalconphp.com/de/)
+- [Command-line fuzzy finder](https://github.com/junegunn/fzf)

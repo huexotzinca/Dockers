@@ -9,8 +9,10 @@ This repo contains all Dockerfiles for automaticbuild used in [Huexotzinca's con
 
 This Dockerfile builds an container for development purposes, [based on Ubuntu-Base](https://github.com/huexotzinca/Dockers/tree/ubuntu-base) container plus the next tools:
 
+- [Command-line fuzzy finder](https://github.com/junegunn/fzf)
 - Apache
 -	PHP (7.0.*)
+  - [PhalconPHP](https://phalconphp.com/de/)
 	-	Composer
 		-	Laravel
 		-	PHPUnit
@@ -45,14 +47,14 @@ This Dockerfile builds an container for development purposes, [based on Ubuntu-B
 	```bash
 	> docker build -t my_image_name:my_tag .
 	# Example:
-	> docker build -t huexotzinca/development:v0.1.0 .
+	> docker build -t huexotzinca/development:v0.1.4 .
 	```
 
 3. Now you can run your container
 	```bash
 	> docker run -itP my_image_name:my_tag
 	# Example, I would like have access to my code in the container, so you need -v (volume parameter):
-	> docker run -itP -v /my/machine/path/for/projects:/home/docker/projects huexotzinca/development:v0.1.0
+	> docker run -itP -v /my/machine/path/for/projects:/home/docker/projects huexotzinca/development:v0.1.4
 	> 
 	# List your container ports with:
 	> docker ps -la
