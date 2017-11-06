@@ -101,9 +101,6 @@ RUN chown -R "${USER_NAME}:${USER_NAME}" "${USER_PATH}/apache" && \
 COPY start.sh /root/start.sh
 RUN chmod +x /root/start.sh
 
-COPY after_init.sh /home/docker/after_init.sh
-RUN chmod +x /home/docker/after_init.sh && chown ${USER_NAME}:${USER_NAME} /home/docker/after_init.sh
-
 # Make apache conf backup copy
 RUN cp /etc/apache2/apache2.conf /etc/apache2/apache2.conf.backup
 COPY apache2.conf /etc/apache2/apache2.conf
