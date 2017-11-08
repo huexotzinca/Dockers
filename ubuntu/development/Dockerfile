@@ -43,6 +43,8 @@ USER "${USER_NAME}"
 RUN mkdir -p "${TMP_PATH}"
 WORKDIR $TMP_PATH
 
+COPY "${BASH_RC_FILE}" "${USER_PATH}/.bashrc"
+
 ### PHP
 ###############################
 
@@ -85,8 +87,6 @@ RUN sudo groupadd ${APACHE_GROUP_NAME}
 RUN sudo usermod -a -G ${ADMIN_GROUP_NAME} ${APACHE_USER_NAME}
 # Adding docker user to apache group
 RUN sudo usermod -a -G ${APACHE_GROUP_NAME} ${USER_NAME}
-
-COPY "${BASH_RC_FILE}" "${USER_PATH}/.bashrc"
 
 USER root
 

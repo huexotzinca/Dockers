@@ -80,13 +80,25 @@ function take(){ mkdir -p $1; cd $1; }
 # to enable __git_ps1
 source /etc/bash_completion.d/git-prompt
 
-export PS1="$C_RED$(get_is_ok)$C_RESETCOLOR\n$(get_base_name)$C_YELLOW@$C_RESETCOLOR\h$C_YELLOW:$C_RESETCOLOR$(get_pwd)$(get_git_prompt_info)\n$C_YELLOW ↪ $C_RESETCOLOR"
+PS1="$C_RED$(get_is_ok)$C_RESETCOLOR\n$(get_base_name)$C_YELLOW@$C_RESETCOLOR\h$C_YELLOW:$C_RESETCOLOR$(get_pwd)$(get_git_prompt_info)\n$C_RED #↪ $C_RESETCOLOR"
 
-[[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm"
-export PATH="$PATH:$HOME/.rvm/bin" # Add RVM to PATH for scripting
+if [ "$(id -u)" != "0" ]; then
+  PS1="$C_RED$(get_is_ok)$C_RESETCOLOR\n$(get_base_name)$C_YELLOW@$C_RESETCOLOR\h$C_YELLOW:$C_RESETCOLOR$(get_pwd)$(get_git_prompt_info)\n$C_YELLOW ↪ $C_RESETCOLOR"
+  
+  [[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm"
+  export PATH="$PATH:$HOME/.rvm/bin" # Add RVM to PATH for scripting
 
-export NVM_DIR="$HOME/.nvm"
+fi
+
+export PS1
+
+# NVM for Node
+export NVM_DIR="/home/docker/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"  # This loads nvm
+
+# Lua and Luaver for run Lapis
+[ -s ~/.luaver/luaver  ] && . ~/.luaver/luaver
+[ -s ~/.luaver/completions/luaver.bash  ] && . ~/.luaver/completions/luaver.bash
 
 # Composer
 export PATH="$PATH:$HOME/.composer/vendor/bin"
