@@ -1,7 +1,8 @@
 FROM huexotzinca/base
+# FROM huexotzinca/ubuntu-development:v0.1.4
 MAINTAINER Neftali Bautista<dev@neftalibautista.com>
 
-LABEL version="0.1.3"
+LABEL version="0.1.4"
 
 ARG ADMIN_GROUP_NAME="admin"
 ARG USER_NAME="docker"
@@ -19,8 +20,12 @@ ARG BASH_RC_FILE="bashrc"
 RUN apt-get update 
 
 # Apache, PHP and MySQL-PostgreSQL
-RUN apt-get -y install apache2 apache2-dev && \
-    apt-get -y install php php-cli && \
+RUN apt-get -y install tmux libpcre3-dev && \
+    apt-get -y install gcc g++ libboost-all-dev cmake && \
+    apt-get -y install software-properties-common && \
+    apt-get -y install python-software-properties && \
+    apt-get -y install apache2 apache2-dev && \
+    apt-get -y install php php-cli php-dev && \
     DEBIAN_FRONTEND=noninteractive apt-get -y install mysql-server && \
     apt-get -y install mysql-client && \
     DEBIAN_FRONTEND=noninteractive apt-get -y install postgresql && \
@@ -38,14 +43,34 @@ USER "${USER_NAME}"
 RUN mkdir -p "${TMP_PATH}"
 WORKDIR $TMP_PATH
 
-# Composer
+### PHP
+###############################
+
+## Composer
 RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" && \
     php composer-setup.php && \
     php -r "unlink('composer-setup.php');" && \
     sudo mv composer.phar /usr/local/bin/composer && \
     composer self-update && \
-    composer global require "phpunit/phpunit=${PHPUNIT_VERSION}.*" && \
-    composer global require "laravel/installer"
+    composer global require "phpunit/phpunit=${PHPUNIT_VERSION}.*"
+
+## Laravel
+RUN composer global require "laravel/installer"
+
+## PhalconPHP
+RUN curl -s https://packagecloud.io/install/repositories/phalcon/nightly/script.deb.sh | sudo bash && \
+    sudo sed -i 's/yakkety/xenial/g' /etc/apt/sources.list.d/phalcon_nightly.list && \
+    sudo apt-get update && \
+    sudo apt-get install php7.0-phalcon && \
+    sudo apache2ctl -k restart
+# Note: When the issue https://github.com/phalcongelist/packagecloud/issues/10
+#       has been solved remove the sed line to use yakkety sources.
+
+### /PHP
+
+
+### APACHE
+###############################
 
 # Config apache
 COPY apache "${USER_PATH}/apache"
@@ -63,16 +88,6 @@ RUN sudo usermod -a -G ${APACHE_GROUP_NAME} ${USER_NAME}
 
 COPY "${BASH_RC_FILE}" "${USER_PATH}/.bashrc"
 
-# vim and git global files
-WORKDIR $TMP_PATH
-RUN git clone https://github.com/huexotzinca/dotfiles && \
-    cp -r dotfiles/vim "$USER_PATH/.vim" && \
-    cp dotfiles/vimrc "$USER_PATH/.vimrc" && \
-    cp dotfiles/gitconfig "$USER_PATH/.gitconfig" && \
-    cp dotfiles/gitignore "$USER_PATH/.gitignore" && \
-    git config --global --unset user.name && \
-    git config --global --unset user.email
-
 USER root
 
 RUN mkdir "${USER_PATH}/apache/enabled"
@@ -86,17 +101,23 @@ RUN chown -R "${USER_NAME}:${USER_NAME}" "${USER_PATH}/apache" && \
 COPY start.sh /root/start.sh
 RUN chmod +x /root/start.sh
 
-COPY after_init.sh /home/docker/after_init.sh
-RUN chmod +x /home/docker/after_init.sh && chown ${USER_NAME}:${USER_NAME} /home/docker/after_init.sh
-
 # Make apache conf backup copy
 RUN cp /etc/apache2/apache2.conf /etc/apache2/apache2.conf.backup
 COPY apache2.conf /etc/apache2/apache2.conf
+
+### /APACHE
+
+
+### MYSQL
+###############################
 
 # Install tools for mysql and set the root password
 RUN apt-get -y install libmysqlclient20 libmysqlclient-dev python-dev && \
     service mysql start && \
     mysql -e "SET PASSWORD FOR 'root'@'localhost' = PASSWORD('${ROOT_DB_PASSWORD}');"
+
+### /MYSQL
+
 
 # Expose the Apache ports
 EXPOSE 80 8080
@@ -113,6 +134,7 @@ EXPOSE 8000
 ### /Expose the Frameworks ports   ###
 
 WORKDIR $USER_PATH
+# Clean tmp folder
 RUN rm -rf "${TMP_PATH}"
 RUN [ -f "/home/docker/.sudo_as_admin_successful" ] && \
     rm -rf "/home/docker/.sudo_as_admin_successful" || echo "File not found"
